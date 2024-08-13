@@ -152,11 +152,31 @@
         cursor: pointer;
     }
     .filters {
-        display: flex;
-        justify-content: space-between; /* Espace les éléments également */
-        margin-bottom: 20px;
-        gap: 10px; /* Espace entre les filtres */
+    display: flex;
+    justify-content: space-between; /* Espace les éléments également */
+    margin-bottom: 20px;
+    gap: 10px; /* Espace entre les filtres */
+}
+
+/* Adaptation mobile */
+@media (max-width: 768px) { /* Ajustez la largeur maximale selon vos besoins */
+    .filters {
+        flex-direction: column; /* Empile les filtres en colonne */
     }
+
+    .filter-container {
+                display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+        width: 100%; /* Chaque filtre prend 100% de la largeur */
+        margin-bottom: 10px; /* Ajoute un espace entre les filtres */
+    }
+
+    .filter-container button {
+        width: 100%; /* Le bouton occupe toute la largeur */
+    }
+}
     button {
         color: white;
     }

@@ -215,6 +215,15 @@ document.addEventListener('DOMContentLoaded', () => {
         searchButton.addEventListener('click', filterResults);
     }
 
+    const nameSearch = document.getElementById('nameSearch')!.addEventListener('keydown', function(event) {
+        if (event.key === 'Enter') { // Vérifie si la touche pressée est "Entrée"
+            event.preventDefault(); // Empêche l'action par défaut du formulaire
+            fetchData(); // Appelle la fonction fetchData
+        }
+    });
+
+
+
     // Gestion du clic sur le bouton de fermeture
     const closeButton = document.getElementById('closePopup') as HTMLButtonElement;
     if (closeButton) {
