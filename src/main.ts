@@ -3,7 +3,6 @@ document.addEventListener('DOMContentLoaded', () => {
     async function fetchData() {
         console.log('Popup chargée, récupération des données...');
         try {
-
             const response = await fetch('https://api.kingdom.so/open/marketplace');
             const data = await response.json();
             console.log("Réponse brute de l'API:", data);
@@ -25,7 +24,6 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 console.error("Les données 'toSell' sont vides.");
             }
-            filterResults();
 
         } catch (error) {
             console.error('Erreur lors de la récupération des données:', error);
@@ -214,7 +212,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Gestion du clic sur le bouton de recherche
     const searchButton = document.getElementById('searchBtn') as HTMLButtonElement;
     if (searchButton) {
-        searchButton.addEventListener('click', fetchData);
+        searchButton.addEventListener('click', filterResults);
     }
 
     const nameSearch = document.getElementById('nameSearch')!.addEventListener('keydown', function(event) {
