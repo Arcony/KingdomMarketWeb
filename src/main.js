@@ -33,6 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 else {
                     console.error("Les données 'toSell' sont vides.");
                 }
+                filterResults();
             }
             catch (error) {
                 console.error('Erreur lors de la récupération des données:', error);
@@ -199,8 +200,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Gestion du clic sur le bouton de recherche
     const searchButton = document.getElementById('searchBtn');
     if (searchButton) {
-        searchButton.addEventListener('click', filterResults);
+        searchButton.addEventListener('click', fetchData);
     }
+    const nameSearch = document.getElementById('nameSearch').addEventListener('keydown', function (event) {
+        if (event.key === 'Enter') { // Vérifie si la touche pressée est "Entrée"
+            event.preventDefault(); // Empêche l'action par défaut du formulaire
+            fetchData(); // Appelle la fonction fetchData
+        }
+    });
     // Gestion du clic sur le bouton de fermeture
     const closeButton = document.getElementById('closePopup');
     if (closeButton) {
