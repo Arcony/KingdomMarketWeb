@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 document.addEventListener('DOMContentLoaded', () => {
     // Fonction pour récupérer les données de l'API
+    let listenersDone = false;
     function fetchData() {
         return __awaiter(this, void 0, void 0, function* () {
             console.log('Popup chargée, récupération des données...');
@@ -33,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 else {
                     console.error("Les données 'toSell' sont vides.");
                 }
+                filterResults();
             }
             catch (error) {
                 console.error('Erreur lors de la récupération des données:', error);
@@ -100,15 +102,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     // Fonction pour ajouter les écouteurs d'événements de tri aux en-têtes
     function addSortListeners(table) {
-        const headers = table.querySelectorAll('thead th[data-sort]');
-        headers.forEach(header => {
-            header.addEventListener('click', () => {
-                const sortKey = header.getAttribute('data-sort');
-                if (sortKey) {
-                    toggleSort(table, sortKey, header);
-                }
+        if (!listenersDone) {
+            console.log("test");
+            const headers = table.querySelectorAll('thead th[data-sort]');
+            headers.forEach(header => {
+                header.addEventListener('click', () => {
+                    const sortKey = header.getAttribute('data-sort');
+                    if (sortKey) {
+                        toggleSort(table, sortKey, header);
+                    }
+                });
             });
-        });
+            listenersDone = true;
+        }
     }
     // Fonction pour activer le tri multi-colonnes
     function toggleSort(table, sortKey, header) {
@@ -144,12 +150,16 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         const rowsArray = Array.from(tbody.querySelectorAll('tr'));
         rowsArray.sort((a, b) => {
-            var _a, _b;
+            var _a, _b, _c, _d;
             for (const { key, direction } of sortDirections) {
-                const cellA = ((_a = a.querySelector(`td[data-sort="${key}"]`)) === null || _a === void 0 ? void 0 : _a.textContent) || '';
-                const cellB = ((_b = b.querySelector(`td[data-sort="${key}"]`)) === null || _b === void 0 ? void 0 : _b.textContent) || '';
-                const valueA = isNaN(parseFloat(cellA)) ? cellA : parseFloat(cellA);
-                const valueB = isNaN(parseFloat(cellB)) ? cellB : parseFloat(cellB);
+                const cellA = ((_b = (_a = a.querySelector(`td[data-sort="${key}"]`)) === null || _a === void 0 ? void 0 : _a.textContent) === null || _b === void 0 ? void 0 : _b.trim()) || '';
+                const cellB = ((_d = (_c = b.querySelector(`td[data-sort="${key}"]`)) === null || _c === void 0 ? void 0 : _c.textContent) === null || _d === void 0 ? void 0 : _d.trim()) || '';
+                let valueA = parseFloat(cellA.replace(/[^0-9.-]+/g, ''));
+                let valueB = parseFloat(cellB.replace(/[^0-9.-]+/g, ''));
+                if (isNaN(valueA))
+                    valueA = cellA;
+                if (isNaN(valueB))
+                    valueB = cellB;
                 if (valueA > valueB)
                     return direction === 'asc' ? 1 : -1;
                 if (valueA < valueB)
@@ -157,8 +167,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             return 0;
         });
+        // Reconstruire le tableau en une seule opération
+        const fragment = document.createDocumentFragment();
+        rowsArray.forEach(row => fragment.appendChild(row));
         tbody.innerHTML = '';
-        rowsArray.forEach(row => tbody.appendChild(row));
+        tbody.appendChild(fragment);
     }
     function filterResults() {
         const nameSearch = document.getElementById('nameSearch').value.toLowerCase();
@@ -199,7 +212,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Gestion du clic sur le bouton de recherche
     const searchButton = document.getElementById('searchBtn');
     if (searchButton) {
-        searchButton.addEventListener('click', filterResults);
+        searchButton.addEventListener('click', fetchData);
     }
     const nameSearch = document.getElementById('nameSearch').addEventListener('keydown', function (event) {
         if (event.key === 'Enter') { // Vérifie si la touche pressée est "Entrée"

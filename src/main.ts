@@ -1,8 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
     // Fonction pour récupérer les données de l'API
+    let listenersDone = false;
+
     async function fetchData() {
         console.log('Popup chargée, récupération des données...');
         try {
+
             const response = await fetch('https://api.kingdom.so/open/marketplace');
             const data = await response.json();
             console.log("Réponse brute de l'API:", data);
@@ -24,6 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 console.error("Les données 'toSell' sont vides.");
             }
+            filterResults();
 
         } catch (error) {
             console.error('Erreur lors de la récupération des données:', error);
@@ -100,15 +104,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Fonction pour ajouter les écouteurs d'événements de tri aux en-têtes
     function addSortListeners(table: HTMLTableElement) {
-        const headers = table.querySelectorAll('thead th[data-sort]') as NodeListOf<HTMLTableHeaderCellElement>;
-        headers.forEach(header => {
-            header.addEventListener('click', () => {
-                const sortKey = header.getAttribute('data-sort');
-                if (sortKey) {
-                    toggleSort(table, sortKey, header);
-                }
+        if (!listenersDone) {
+            console.log("test")
+            const headers = table.querySelectorAll('thead th[data-sort]') as NodeListOf<HTMLTableHeaderCellElement>;
+            headers.forEach(header => {
+                header.addEventListener('click', () => {
+                    const sortKey = header.getAttribute('data-sort');
+                    if (sortKey) {
+                        toggleSort(table, sortKey, header);
+                    }
+                });
             });
-        });
+            listenersDone = true;
+        }
     }
 
     // Fonction pour activer le tri multi-colonnes
@@ -146,27 +154,32 @@ document.addEventListener('DOMContentLoaded', () => {
     function sortTable(table: HTMLTableElement, sortDirections: { key: string, direction: 'asc' | 'desc' }[]) {
         const tbody = table.querySelector('tbody');
         if (!tbody) return;
-
+    
         const rowsArray = Array.from(tbody.querySelectorAll('tr'));
-
+    
         rowsArray.sort((a, b) => {
             for (const { key, direction } of sortDirections) {
-                const cellA = a.querySelector(`td[data-sort="${key}"]`)?.textContent || '';
-                const cellB = b.querySelector(`td[data-sort="${key}"]`)?.textContent || '';
-
-                const valueA = isNaN(parseFloat(cellA)) ? cellA : parseFloat(cellA);
-                const valueB = isNaN(parseFloat(cellB)) ? cellB : parseFloat(cellB);
-
+                const cellA = a.querySelector(`td[data-sort="${key}"]`)?.textContent?.trim() || '';
+                const cellB = b.querySelector(`td[data-sort="${key}"]`)?.textContent?.trim() || '';
+    
+                let valueA: number | string = parseFloat(cellA.replace(/[^0-9.-]+/g, ''));
+                let valueB: number | string = parseFloat(cellB.replace(/[^0-9.-]+/g, ''));
+    
+                if (isNaN(valueA)) valueA = cellA;
+                if (isNaN(valueB)) valueB = cellB;
+    
                 if (valueA > valueB) return direction === 'asc' ? 1 : -1;
                 if (valueA < valueB) return direction === 'asc' ? -1 : 1;
             }
             return 0;
         });
-
+    
+        // Reconstruire le tableau en une seule opération
+        const fragment = document.createDocumentFragment();
+        rowsArray.forEach(row => fragment.appendChild(row));
         tbody.innerHTML = '';
-        rowsArray.forEach(row => tbody.appendChild(row));
+        tbody.appendChild(fragment);
     }
-
     function filterResults() {
         const nameSearch = (document.getElementById('nameSearch') as HTMLInputElement).value.toLowerCase();
         const categorySelect = (document.getElementById('categorySelect') as HTMLSelectElement).value;
@@ -212,7 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Gestion du clic sur le bouton de recherche
     const searchButton = document.getElementById('searchBtn') as HTMLButtonElement;
     if (searchButton) {
-        searchButton.addEventListener('click', filterResults);
+        searchButton.addEventListener('click', fetchData);
     }
 
     const nameSearch = document.getElementById('nameSearch')!.addEventListener('keydown', function(event) {
